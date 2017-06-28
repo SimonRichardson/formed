@@ -3,13 +3,13 @@ package query
 import (
 	"net/http"
 
+	"github.com/SimonRichardson/formed/pkg/controllers"
 	"github.com/go-kit/kit/log"
 )
 
 // These are the the query API URL paths
 const (
-	APIPathLoad = "/load"
-	APIPathSave = "/save"
+	APIPathQuery = "/"
 )
 
 // API serves the query API
@@ -28,10 +28,18 @@ func (a *API) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	iw := &interceptingWriter{http.StatusOK, w}
 	w = iw
 
+	// Create a new controller to handle the various routes
+	ctrl := controllers.New(w, r)
+
 	// Routing table
+	method, path := r.Method, r.URL.Path
 	switch {
+	case method == "GET" && path == APIPathQuery:
+		ctrl.Get()
+	case method == "POST" && path == APIPathQuery:
+		ctrl.Post()
 	default:
-		http.NotFound(w, r)
+		ctrl.NotFound()
 	}
 }
 
