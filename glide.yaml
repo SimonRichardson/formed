@@ -5,3 +5,4 @@ import:
   - package: github.com/go-kit/kit
   - package: github.com/go-logfmt/logfmt
   - package: github.com/go-stack/stack
+  - package: github.com/golang/mock/gomock

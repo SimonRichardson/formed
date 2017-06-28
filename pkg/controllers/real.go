@@ -1,8 +1,6 @@
 package controllers
 
-import (
-	"net/http"
-)
+import "net/http"
 
 type real struct {
 	writer  http.ResponseWriter

@@ -1,5 +1,5 @@
-hash: 7621abcbb7aa36f44c1bd27b1378b8fa8c56f6d586c08736da023f132b4ff87a
-updated: 2017-06-28T10:22:04.131773565+01:00
+hash: e2e298b4e08c7b891ea8794a048f11aa41370cb2f72329bc0f618806b136cd60
+updated: 2017-06-28T20:24:22.840679053+01:00
 imports:
 - name: github.com/go-kit/kit
   version: d67bb4c202e3b91377d1079b110a6c9ce23ab2f8
@@ -10,25 +10,12 @@ imports:
   version: 390ab7935ee28ec6b286364bba9b4dd6410cb3d5
 - name: github.com/go-stack/stack
   version: 7a2f19628aabfe68f0766b59e74d6315f8347d22
+- name: github.com/golang/mock
+  version: 93f6609a15b7de76bd49259f1f9a6b58df358936
+  subpackages:
+  - gomock
 - name: github.com/kr/logfmt
   version: b84e30acd515aadc4b783ad4ff83aff3299bdfe0
-- name: github.com/lib/pq
-  version: 91f10e40ba0dd2d0bf9f93ec1d4077711a78df88
-  subpackages:
-  - oid
-- name: github.com/pborman/uuid
-  version: 1b00554d822231195d1babd97ff4a781231955c9
 - name: github.com/pkg/errors
   version: c605e284fe17294bda444b34710735b29d1a9d90
-- name: github.com/SimonRichardson/cookson
-  version: 0f56cd025fd52a886b2a50906ea30e216374ef89
-  subpackages:
-  - pkg/document
-  - pkg/httperrors
-  - pkg/query
-  - pkg/store
-- name: github.com/SimonRichardson/foodhygiene
-  version: 1496921d6a88ecc34f8ada17bef7455642f23f48
-  subpackages:
-  - pkg/service
 testImports: []
