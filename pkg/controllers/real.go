@@ -1,15 +1,21 @@
 package controllers
 
-import "net/http"
+import (
+	"net/http"
+
+	"github.com/SimonRichardson/formed/pkg/store"
+)
 
 type real struct {
+	store   store.Store
 	writer  http.ResponseWriter
 	request *http.Request
 }
 
 // New creates a controller with the correct dependencies for the query.API
-func New(w http.ResponseWriter, r *http.Request) Controller {
+func New(store store.Store, w http.ResponseWriter, r *http.Request) Controller {
 	return &real{
+		store:   store,
 		writer:  w,
 		request: r,
 	}

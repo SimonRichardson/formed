@@ -7,9 +7,15 @@ import (
 	"net/http"
 	"os"
 
+	"github.com/SimonRichardson/formed/pkg/fs"
 	"github.com/SimonRichardson/formed/pkg/query"
+	"github.com/SimonRichardson/formed/pkg/store"
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/log/level"
+)
+
+const (
+	defaultFileStore = "users.txt"
 )
 
 // runQuery creates all the dependencies required to create and run the query
@@ -18,8 +24,9 @@ func runQuery(args []string) error {
 	var (
 		flagset = flag.NewFlagSet("query", flag.ExitOnError)
 
-		debug   = flagset.Bool("debug", false, "debug logging")
-		apiAddr = flagset.String("api", defaultAPIAddr, "listen address for query API")
+		debug     = flagset.Bool("debug", false, "debug logging")
+		apiAddr   = flagset.String("api", defaultAPIAddr, "listen address for query API")
+		fileStore = flagset.String("filestore", defaultFileStore, "location of where the file store")
 	)
 
 	flagset.Usage = usageFor(flagset, "query [flags]")
@@ -56,7 +63,12 @@ func runQuery(args []string) error {
 	defer apiListener.Close()
 
 	// API that is going to handle the incoming requests.
-	api := query.NewAPI(log.With(logger, "component", "api"))
+	var (
+		fsys   = fs.New()
+		store  = store.New(fsys, *fileStore)
+		facade = query.NewFacade(store)
+		api    = query.NewAPI(facade, log.With(logger, "component", "api"))
+	)
 
 	mux := http.NewServeMux()
 	mux.Handle("/query/", http.StripPrefix("/query", api))

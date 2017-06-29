@@ -6,15 +6,22 @@ import (
 	"net/http/httptest"
 	"testing"
 
+	"github.com/SimonRichardson/formed/pkg/store/mock_store"
 	"github.com/go-kit/kit/log"
+	"github.com/golang/mock/gomock"
 )
 
 func TestAPIGet(t *testing.T) {
 	t.Parallel()
 
 	t.Run("not found", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
 		var (
-			api    = NewAPI(log.NewNopLogger())
+			store  = mock_store.NewMockStore(ctrl)
+			facade = NewFacade(store)
+			api    = NewAPI(facade, log.NewNopLogger())
 			server = httptest.NewServer(api)
 
 			u = fmt.Sprintf("%s/", server.URL)
@@ -36,8 +43,13 @@ func TestAPIPost(t *testing.T) {
 	t.Parallel()
 
 	t.Run("not found", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
 		var (
-			api    = NewAPI(log.NewNopLogger())
+			store  = mock_store.NewMockStore(ctrl)
+			facade = NewFacade(store)
+			api    = NewAPI(facade, log.NewNopLogger())
 			server = httptest.NewServer(api)
 
 			u = fmt.Sprintf("%s/", server.URL)
@@ -59,8 +71,13 @@ func TestAPINotFound(t *testing.T) {
 	t.Parallel()
 
 	t.Run("not found", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
 		var (
-			api    = NewAPI(log.NewNopLogger())
+			store  = mock_store.NewMockStore(ctrl)
+			facade = NewFacade(store)
+			api    = NewAPI(facade, log.NewNopLogger())
 			server = httptest.NewServer(api)
 
 			u = fmt.Sprintf("%s/bad", server.URL)
