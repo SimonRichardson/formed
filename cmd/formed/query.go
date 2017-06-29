@@ -17,7 +17,7 @@ import (
 )
 
 const (
-	defaultFileStore = "users.txt"
+	defaultFileStore = "./data/store.csv"
 )
 
 // runQuery creates all the dependencies required to create and run the query
@@ -90,6 +90,12 @@ func gatherTemplates() (*templates.Templates, error) {
 		return nil, errors.Wrap(err, "no fallback template")
 	}
 
+	formTemplate, err := templates.NewFormTemplate()
+	if err != nil {
+		return nil, errors.Wrap(err, "no form template")
+	}
+
 	templates := templates.NewTemplates(fallback)
+	templates.Set(http.StatusOK, formTemplate)
 	return templates, nil
 }

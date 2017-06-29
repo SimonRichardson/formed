@@ -49,3 +49,33 @@ const errorTemplate = `<!DOCTYPE html>
     <p>{{.Error}}</p>
   </body>
 </html>`
+
+// NewFormTemplate provides a template for the form view
+func NewFormTemplate() (*template.Template, error) {
+	return template.New("form").Parse(formTemplate)
+}
+
+const formTemplate = `<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Formed</title>
+  </head>
+  <body>
+    <form>
+		<table>
+			<tr>
+				<th>First name</th>
+				<th>Last name</th>
+			</tr>
+			{{ range . }}
+			<tr>
+				<td><input type="text" name="people[][firstname]" value="{{ .FirstName }}" /></td>
+				<td><input type="text" name="people[][surname]" value="{{ .Surname }}" /></td>
+			</tr>
+			{{ end }}
+		</table>
+		<input type="submit" value="OK" />
+	</form>
+  </body>
+</html>`
