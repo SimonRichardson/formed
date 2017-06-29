@@ -25,6 +25,15 @@ func New(store store.Store, w http.ResponseWriter, r *http.Request) Controller {
 // nothing then it will return defaults. If an error occurs whilst
 // attempting to get, then an error will be rendered.
 func (r *real) Get() {
+	users, err := r.store.Read()
+	if err != nil {
+		r.writer.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	if len(users) == 0 {
+		r.writer.WriteHeader(http.StatusNotFound)
+		return
+	}
 	r.writer.WriteHeader(http.StatusOK)
 }
 
