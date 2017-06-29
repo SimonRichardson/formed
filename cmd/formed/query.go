@@ -29,6 +29,7 @@ func runQuery(args []string) error {
 		debug     = flagset.Bool("debug", false, "debug logging")
 		apiAddr   = flagset.String("api", defaultAPIAddr, "listen address for query API")
 		fileStore = flagset.String("filestore", defaultFileStore, "location of where the file store")
+		uiLocal   = flagset.Bool("ui.local", false, "ignores embedded files and goes straight to the filesystem")
 	)
 
 	flagset.Usage = usageFor(flagset, "query [flags]")
@@ -55,7 +56,7 @@ func runQuery(args []string) error {
 	}
 
 	// Get all the templates for the query
-	templates, err := gatherTemplates()
+	templates, err := gatherTemplates(*uiLocal)
 	if err != nil {
 		return err
 	}
@@ -84,13 +85,13 @@ func runQuery(args []string) error {
 	return http.Serve(apiListener, mux)
 }
 
-func gatherTemplates() (*templates.Templates, error) {
-	fallback, err := templates.NewErrorTemplate()
+func gatherTemplates(uiLocal bool) (*templates.Templates, error) {
+	fallback, err := templates.NewErrorTemplate(uiLocal)
 	if err != nil {
 		return nil, errors.Wrap(err, "no fallback template")
 	}
 
-	formTemplate, err := templates.NewFormTemplate()
+	formTemplate, err := templates.NewFormTemplate(uiLocal)
 	if err != nil {
 		return nil, errors.Wrap(err, "no form template")
 	}

@@ -15,7 +15,7 @@ import (
 func TestGet(t *testing.T) {
 	t.Parallel()
 
-	fallback, err := templates.NewErrorTemplate()
+	fallback, err := templates.NewErrorTemplate(false)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -88,7 +88,7 @@ func TestGet(t *testing.T) {
 func TestPost(t *testing.T) {
 	t.Parallel()
 
-	fallback, err := templates.NewErrorTemplate()
+	fallback, err := templates.NewErrorTemplate(false)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -170,7 +170,7 @@ func TestPost(t *testing.T) {
 func TestNotFound(t *testing.T) {
 	t.Parallel()
 
-	fallback, err := templates.NewErrorTemplate()
+	fallback, err := templates.NewErrorTemplate(false)
 	if err != nil {
 		t.Fatal(err)
 	}

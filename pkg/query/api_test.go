@@ -16,7 +16,7 @@ import (
 func TestAPIGet(t *testing.T) {
 	t.Parallel()
 
-	fallback, err := templates.NewErrorTemplate()
+	fallback, err := templates.NewErrorTemplate(false)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -54,7 +54,7 @@ func TestAPIGet(t *testing.T) {
 func TestAPIPost(t *testing.T) {
 	t.Parallel()
 
-	fallback, err := templates.NewErrorTemplate()
+	fallback, err := templates.NewErrorTemplate(false)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -79,7 +79,7 @@ func TestAPIPost(t *testing.T) {
 			t.Fatal(err)
 		}
 
-		if expected, actual := http.StatusOK, res.StatusCode; expected != actual {
+		if expected, actual := http.StatusBadRequest, res.StatusCode; expected != actual {
 			t.Errorf("expected: %v, actual: %v", expected, actual)
 		}
 	})
@@ -88,7 +88,7 @@ func TestAPIPost(t *testing.T) {
 func TestAPINotFound(t *testing.T) {
 	t.Parallel()
 
-	fallback, err := templates.NewErrorTemplate()
+	fallback, err := templates.NewErrorTemplate(false)
 	if err != nil {
 		t.Fatal(err)
 	}

@@ -1,6 +1,10 @@
 package templates
 
-import "html/template"
+import (
+	"html/template"
+
+	"github.com/pkg/errors"
+)
 
 // Templates holds a key, value store of templates that can be used to render
 // depending on the key required.
@@ -34,48 +38,19 @@ func (t *Templates) Set(key int, tmpl *template.Template) {
 }
 
 // NewErrorTemplate provides a template for all generic errors
-func NewErrorTemplate() (*template.Template, error) {
-	return template.New("error").Parse(errorTemplate)
+func NewErrorTemplate(useLocal bool) (*template.Template, error) {
+	tmpl, err := FSString(useLocal, "/views/error.html")
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to load template")
+	}
+	return template.New("error").Parse(tmpl)
 }
-
-const errorTemplate = `<!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <title>Formed - Error!</title>
-  </head>
-  <body>
-    <h1>Error</h1>
-    <p>{{.Error}}</p>
-  </body>
-</html>`
 
 // NewFormTemplate provides a template for the form view
-func NewFormTemplate() (*template.Template, error) {
-	return template.New("form").Parse(formTemplate)
+func NewFormTemplate(useLocal bool) (*template.Template, error) {
+	tmpl, err := FSString(useLocal, "/views/index.html")
+	if err != nil {
+		return nil, errors.Wrap(err, "unable to load template")
+	}
+	return template.New("form").Parse(tmpl)
 }
-
-const formTemplate = `<!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <title>Formed</title>
-  </head>
-  <body>
-    <form method="post" action="#">
-		<table>
-			<tr>
-				<th>First name</th>
-				<th>Last name</th>
-			</tr>
-			{{ range . }}
-			<tr>
-				<td><input type="text" name="people[][firstname]" value="{{ .FirstName }}" /></td>
-				<td><input type="text" name="people[][surname]" value="{{ .Surname }}" /></td>
-			</tr>
-			{{ end }}
-		</table>
-		<input type="submit" value="OK" />
-	</form>
-  </body>
-</html>`
