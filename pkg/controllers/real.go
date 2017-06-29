@@ -1,23 +1,27 @@
 package controllers
 
 import (
+	"errors"
 	"net/http"
 
 	"github.com/SimonRichardson/formed/pkg/store"
+	"github.com/SimonRichardson/formed/pkg/templates"
 )
 
 type real struct {
-	store   store.Store
-	writer  http.ResponseWriter
-	request *http.Request
+	store     store.Store
+	templates *templates.Templates
+	writer    http.ResponseWriter
+	request   *http.Request
 }
 
 // New creates a controller with the correct dependencies for the query.API
-func New(store store.Store, w http.ResponseWriter, r *http.Request) Controller {
+func New(s store.Store, t *templates.Templates, w http.ResponseWriter, r *http.Request) Controller {
 	return &real{
-		store:   store,
-		writer:  w,
-		request: r,
+		store:     s,
+		templates: t,
+		writer:    w,
+		request:   r,
 	}
 }
 
@@ -25,16 +29,19 @@ func New(store store.Store, w http.ResponseWriter, r *http.Request) Controller {
 // nothing then it will return defaults. If an error occurs whilst
 // attempting to get, then an error will be rendered.
 func (r *real) Get() {
+	// Read the store and then render the correct output
 	users, err := r.store.Read()
 	if err != nil {
-		r.writer.WriteHeader(http.StatusInternalServerError)
+		r.render(http.StatusInternalServerError, err)
 		return
 	}
+
 	if len(users) == 0 {
-		r.writer.WriteHeader(http.StatusNotFound)
+		r.render(http.StatusNotFound, errors.New("no users found"))
 		return
 	}
-	r.writer.WriteHeader(http.StatusOK)
+
+	r.render(http.StatusOK, users)
 }
 
 // Post consumes a form that will put the data in to the underlying store.
@@ -48,4 +55,11 @@ func (r *real) Post() {
 // rendered.
 func (r *real) NotFound() {
 	r.writer.WriteHeader(http.StatusNotFound)
+}
+
+func (r *real) render(code int, data interface{}) {
+	r.writer.WriteHeader(code)
+
+	template := r.templates.Get(code)
+	template.Execute(r.writer, data)
 }

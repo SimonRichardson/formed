@@ -8,11 +8,18 @@ import (
 
 	"github.com/SimonRichardson/formed/pkg/models"
 	"github.com/SimonRichardson/formed/pkg/store/mock_store"
+	"github.com/SimonRichardson/formed/pkg/templates"
 	"github.com/golang/mock/gomock"
 )
 
 func TestGet(t *testing.T) {
 	t.Parallel()
+
+	fallback, err := templates.NewErrorTemplate()
+	if err != nil {
+		t.Fatal(err)
+	}
+	templates := templates.NewTemplates(fallback)
 
 	t.Run("status code with no users", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
@@ -21,7 +28,7 @@ func TestGet(t *testing.T) {
 		var (
 			store      = mock_store.NewMockStore(ctrl)
 			recorder   = httptest.NewRecorder()
-			controller = New(store, recorder, httptest.NewRequest("GET", "/", nil))
+			controller = New(store, templates, recorder, httptest.NewRequest("GET", "/", nil))
 		)
 
 		store.EXPECT().
@@ -42,7 +49,7 @@ func TestGet(t *testing.T) {
 		var (
 			store      = mock_store.NewMockStore(ctrl)
 			recorder   = httptest.NewRecorder()
-			controller = New(store, recorder, httptest.NewRequest("GET", "/", nil))
+			controller = New(store, templates, recorder, httptest.NewRequest("GET", "/", nil))
 		)
 
 		store.EXPECT().
@@ -63,7 +70,7 @@ func TestGet(t *testing.T) {
 		var (
 			store      = mock_store.NewMockStore(ctrl)
 			recorder   = httptest.NewRecorder()
-			controller = New(store, recorder, httptest.NewRequest("GET", "/", nil))
+			controller = New(store, templates, recorder, httptest.NewRequest("GET", "/", nil))
 		)
 
 		store.EXPECT().
@@ -81,6 +88,12 @@ func TestGet(t *testing.T) {
 func TestPost(t *testing.T) {
 	t.Parallel()
 
+	fallback, err := templates.NewErrorTemplate()
+	if err != nil {
+		t.Fatal(err)
+	}
+	templates := templates.NewTemplates(fallback)
+
 	t.Run("status code", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
@@ -88,7 +101,7 @@ func TestPost(t *testing.T) {
 		var (
 			store      = mock_store.NewMockStore(ctrl)
 			recorder   = httptest.NewRecorder()
-			controller = New(store, recorder, httptest.NewRequest("POST", "/", nil))
+			controller = New(store, templates, recorder, httptest.NewRequest("POST", "/", nil))
 		)
 
 		controller.Post()
@@ -102,6 +115,12 @@ func TestPost(t *testing.T) {
 func TestNotFound(t *testing.T) {
 	t.Parallel()
 
+	fallback, err := templates.NewErrorTemplate()
+	if err != nil {
+		t.Fatal(err)
+	}
+	templates := templates.NewTemplates(fallback)
+
 	t.Run("status code", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
@@ -109,7 +128,7 @@ func TestNotFound(t *testing.T) {
 		var (
 			store      = mock_store.NewMockStore(ctrl)
 			recorder   = httptest.NewRecorder()
-			controller = New(store, recorder, httptest.NewRequest("POST", "/bad", nil))
+			controller = New(store, templates, recorder, httptest.NewRequest("POST", "/bad", nil))
 		)
 
 		controller.NotFound()

@@ -5,6 +5,7 @@ import (
 
 	"github.com/SimonRichardson/formed/pkg/controllers"
 	"github.com/SimonRichardson/formed/pkg/store"
+	"github.com/SimonRichardson/formed/pkg/templates"
 	"github.com/go-kit/kit/log"
 )
 
@@ -15,15 +16,15 @@ const (
 
 // API serves the query API
 type API struct {
-	facade *Facade
-	logger log.Logger
+	injector *Injector
+	logger   log.Logger
 }
 
 // NewAPI creates a API with correct dependencies.
-func NewAPI(facade *Facade, logger log.Logger) *API {
+func NewAPI(injector *Injector, logger log.Logger) *API {
 	return &API{
-		facade: facade,
-		logger: logger,
+		injector: injector,
+		logger:   logger,
 	}
 }
 
@@ -32,7 +33,7 @@ func (a *API) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	w = iw
 
 	// Create a new controller to handle the various routes
-	ctrl := a.facade.NewController(w, r)
+	ctrl := a.injector.NewController(w, r)
 
 	// Routing table
 	method, path := r.Method, r.URL.Path
@@ -46,23 +47,25 @@ func (a *API) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// Facade abstracts away some dependencies that are required for creating
+// Injector abstracts away some dependencies that are required for creating
 // certain components.
-type Facade struct {
-	store store.Store
+type Injector struct {
+	store     store.Store
+	templates *templates.Templates
 }
 
-// NewFacade creates a new facade with the correct dependencies
-func NewFacade(store store.Store) *Facade {
-	return &Facade{
-		store: store,
+// NewInjector creates a new injector with the correct dependencies
+func NewInjector(store store.Store, templates *templates.Templates) *Injector {
+	return &Injector{
+		store:     store,
+		templates: templates,
 	}
 }
 
 // NewController creates a controller from the http.ResponseWriter and the
 // http.Request.
-func (f *Facade) NewController(w http.ResponseWriter, r *http.Request) controllers.Controller {
-	return controllers.New(f.store, w, r)
+func (f *Injector) NewController(w http.ResponseWriter, r *http.Request) controllers.Controller {
+	return controllers.New(f.store, f.templates, w, r)
 }
 
 type interceptingWriter struct {

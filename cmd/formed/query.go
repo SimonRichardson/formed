@@ -10,8 +10,10 @@ import (
 	"github.com/SimonRichardson/formed/pkg/fs"
 	"github.com/SimonRichardson/formed/pkg/query"
 	"github.com/SimonRichardson/formed/pkg/store"
+	"github.com/SimonRichardson/formed/pkg/templates"
 	"github.com/go-kit/kit/log"
 	"github.com/go-kit/kit/log/level"
+	"github.com/pkg/errors"
 )
 
 const (
@@ -52,6 +54,12 @@ func runQuery(args []string) error {
 		return err
 	}
 
+	// Get all the templates for the query
+	templates, err := gatherTemplates()
+	if err != nil {
+		return err
+	}
+
 	// Create the api listener for the service
 	apiListener, err := net.Listen(apiNetwork, apiAddress)
 	if err != nil {
@@ -64,14 +72,24 @@ func runQuery(args []string) error {
 
 	// API that is going to handle the incoming requests.
 	var (
-		fsys   = fs.New()
-		store  = store.New(fsys, *fileStore)
-		facade = query.NewFacade(store)
-		api    = query.NewAPI(facade, log.With(logger, "component", "api"))
+		fsys     = fs.New()
+		store    = store.New(fsys, *fileStore)
+		injector = query.NewInjector(store, templates)
+		api      = query.NewAPI(injector, log.With(logger, "component", "api"))
 	)
 
 	mux := http.NewServeMux()
 	mux.Handle("/query/", http.StripPrefix("/query", api))
 
 	return http.Serve(apiListener, mux)
+}
+
+func gatherTemplates() (*templates.Templates, error) {
+	fallback, err := templates.NewErrorTemplate()
+	if err != nil {
+		return nil, errors.Wrap(err, "no fallback template")
+	}
+
+	templates := templates.NewTemplates(fallback)
+	return templates, nil
 }
