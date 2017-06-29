@@ -262,6 +262,9 @@ func TestRealWrite(t *testing.T) {
 	})
 }
 
+// stubFile is a file implementation that allows us to define what the Read
+// function does with the bytes slice. Mocking won't allow us to do this, as
+// the bytes slice is mutated, so is not pure!!
 type stubFile struct {
 	bytes  []byte
 	called int
@@ -271,9 +274,8 @@ func (f *stubFile) Read(b []byte) (int, error) {
 	defer func() { f.called++ }()
 
 	if f.called == 0 {
-		x := reflect.ValueOf(b)
 		for k, v := range f.bytes {
-			x.Index(k).Set(reflect.ValueOf(v))
+			b[k] = v
 		}
 		return len(f.bytes), nil
 	}
