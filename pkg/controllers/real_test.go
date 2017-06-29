@@ -94,19 +94,74 @@ func TestPost(t *testing.T) {
 	}
 	templates := templates.NewTemplates(fallback)
 
-	t.Run("status code", func(t *testing.T) {
+	t.Run("valid form data", func(t *testing.T) {
 		ctrl := gomock.NewController(t)
 		defer ctrl.Finish()
 
 		var (
 			store      = mock_store.NewMockStore(ctrl)
 			recorder   = httptest.NewRecorder()
-			controller = New(store, templates, recorder, httptest.NewRequest("POST", "/", nil))
+			request    = httptest.NewRequest("POST", "/", nil)
+			controller = New(store, templates, recorder, request)
 		)
+
+		request.Form = map[string][]string{
+			formKeyFirstName: []string{"fred"},
+			formKeySurname:   []string{"bloggs"},
+		}
+
+		store.EXPECT().
+			Write([]models.User{
+				models.User{"fred", "bloggs"},
+			}).
+			Return(nil)
 
 		controller.Post()
 
-		if expected, actual := http.StatusOK, recorder.Code; expected != actual {
+		if expected, actual := http.StatusSeeOther, recorder.Code; expected != actual {
+			t.Errorf("expected: %v, actual: %v", expected, actual)
+		}
+	})
+
+	t.Run("invalid form data", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		var (
+			store      = mock_store.NewMockStore(ctrl)
+			recorder   = httptest.NewRecorder()
+			request    = httptest.NewRequest("POST", "/", nil)
+			controller = New(store, templates, recorder, request)
+		)
+
+		request.Form = map[string][]string{
+			formKeyFirstName: []string{"fred"},
+			formKeySurname:   []string{""},
+		}
+
+		controller.Post()
+
+		if expected, actual := http.StatusBadRequest, recorder.Code; expected != actual {
+			t.Errorf("expected: %v, actual: %v", expected, actual)
+		}
+	})
+
+	t.Run("no form data", func(t *testing.T) {
+		ctrl := gomock.NewController(t)
+		defer ctrl.Finish()
+
+		var (
+			store      = mock_store.NewMockStore(ctrl)
+			recorder   = httptest.NewRecorder()
+			request    = httptest.NewRequest("POST", "/", nil)
+			controller = New(store, templates, recorder, request)
+		)
+
+		request.Form = map[string][]string{}
+
+		controller.Post()
+
+		if expected, actual := http.StatusBadRequest, recorder.Code; expected != actual {
 			t.Errorf("expected: %v, actual: %v", expected, actual)
 		}
 	})

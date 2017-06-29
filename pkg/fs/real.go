@@ -17,7 +17,7 @@ func New() Filesystem {
 // some way.
 func (realFilesystem) Create(path string) (file File, err error) {
 	var f *os.File
-	f, err = os.Create(path)
+	f, err = os.OpenFile(path, os.O_RDWR|os.O_CREATE, 0666)
 	if err != nil {
 		return
 	}
@@ -33,7 +33,7 @@ func (realFilesystem) Create(path string) (file File, err error) {
 // that file exists, otherwise it returns an error if the file wasn't found.
 func (realFilesystem) Open(path string) (file File, err error) {
 	var f *os.File
-	f, err = os.Open(path)
+	f, err = os.OpenFile(path, os.O_RDWR, 0666)
 	if err != nil {
 		return
 	}

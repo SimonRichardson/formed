@@ -62,7 +62,7 @@ const formTemplate = `<!DOCTYPE html>
     <title>Formed</title>
   </head>
   <body>
-    <form method="POST" action="/query">
+    <form method="post" action="#">
 		<table>
 			<tr>
 				<th>First name</th>

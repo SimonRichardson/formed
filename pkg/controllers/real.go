@@ -1,11 +1,17 @@
 package controllers
 
 import (
-	"errors"
 	"net/http"
 
 	"github.com/SimonRichardson/formed/pkg/store"
 	"github.com/SimonRichardson/formed/pkg/templates"
+	"github.com/pkg/errors"
+)
+
+// go doesn't provide this sort of form iteration, so it just provides a slice
+const (
+	formKeyFirstName = "people[][firstname]"
+	formKeySurname   = "people[][surname]"
 )
 
 type real struct {
@@ -48,13 +54,39 @@ func (r *real) Get() {
 // If an error occurs whilst attempting to save, then an error will be
 // rendered.
 func (r *real) Post() {
-	r.writer.WriteHeader(http.StatusOK)
+	if err := r.request.ParseForm(); err != nil {
+		r.render(http.StatusBadRequest, errors.Wrap(err, "invalid form data"))
+		return
+	}
+
+	// Extract the firstnames, surnames
+	var userForm UserForm
+	if err := userForm.DecodeFrom(r.request.Form); err != nil {
+		r.render(http.StatusBadRequest, errors.Wrap(err, "invalid form user data"))
+		return
+	}
+
+	// Convert the form data to actual users
+	users, err := userForm.Users()
+	if err != nil {
+		r.render(http.StatusBadRequest, errors.Wrap(err, "invalid user data"))
+		return
+	}
+
+	// Write the users to the underlying store
+	if err := r.store.Write(users); err != nil {
+		r.render(http.StatusInternalServerError, errors.Wrap(err, "invalid user data"))
+		return
+	}
+
+	// Once we've written, let's redirect to the correct page
+	http.Redirect(r.writer, r.request, "/query", http.StatusSeeOther)
 }
 
 // NotFound declares a route that doesn't exist, so an error will be
 // rendered.
 func (r *real) NotFound() {
-	r.writer.WriteHeader(http.StatusNotFound)
+	r.render(http.StatusNotFound, errors.New("not found"))
 }
 
 func (r *real) render(code int, data interface{}) {
